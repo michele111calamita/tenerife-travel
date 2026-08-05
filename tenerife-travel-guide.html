@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenerife · 15–21 Agosto · Diario di viaggio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+/* ============ DESIGN TOKENS ============ */
+:root{
+  --bg:#F2E8D3;
+  --bg-alt:#E8DAB8;
+  --card:#FBF6E9;
+  --ink:#1B1A17;
+  --ink-soft:#55503f;
+  --ink-faint:#8a8471;
+  --ocean:#0F3D3C;
+  --ocean-bright:#1C7A72;
+  --ocean-mist:#DCEAE6;
+  --booked:#2E6B45;
+  --booked-bg:#E3EEE1;
+  --optional:#C1601F;
+  --optional-bg:#F6E5D3;
+  --line:rgba(27,26,23,.14);
+  --shadow:0 18px 40px -20px rgba(15,26,25,.35);
+  --radius:22px;
+  --serif:'Fraunces', serif;
+  --sans:'Inter', sans-serif;
+  --mono:'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation:none !important; transition:none !important;} }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(circle at 10% 0%, rgba(15,61,60,.06), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(193,96,31,.05), transparent 35%);
+}
+h1,h2,h3,h4{font-family:var(--serif); margin:0; letter-spacing:-0.01em;}
+p{margin:0;}
+a{color:inherit;}
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+::selection{background:var(--ocean-bright); color:#fff;}
+:focus-visible{outline:3px solid var(--ocean-bright); outline-offset:3px; border-radius:4px;}
+
+/* ============ EYEBROW / LABEL ============ */
+.eyebrow{
+  font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ocean-bright); font-weight:600; display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{content:''; width:16px; height:1px; background:var(--ocean-bright); display:inline-block;}
+
+/* ============ NAV / DAY SELECTOR ============ */
+.topnav{
+  position:sticky; top:0; z-index:50; background:rgba(242,232,211,.88);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+}
+.topnav-inner{display:flex; align-items:center; gap:18px; padding:12px 24px; max-width:1180px; margin:0 auto;}
+.brand{font-family:var(--serif); font-weight:600; font-size:17px; white-space:nowrap; display:flex; align-items:baseline; gap:6px;}
+.brand span{font-family:var(--mono); font-size:11px; color:var(--ink-faint); font-weight:500;}
+.daypills{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding:2px;}
+.daypills::-webkit-scrollbar{display:none;}
+.pill{
+  font-family:var(--mono); font-size:12px; font-weight:600; white-space:nowrap;
+  padding:7px 12px; border-radius:100px; border:1px solid var(--line); background:transparent;
+  color:var(--ink-soft); cursor:pointer; transition:.2s ease;
+}
+.pill:hover{border-color:var(--ocean-bright); color:var(--ocean);}
+.pill.active{background:var(--ocean); color:#fff; border-color:var(--ocean);}
+
+/* ============ HERO ============ */
+.hero{position:relative; padding:76px 0 40px; overflow:hidden;}
+.hero-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:56px; align-items:center;}
+.hero h1{font-size:clamp(40px,6vw,68px); line-height:.98; font-weight:600;}
+.hero h1 em{font-style:italic; font-weight:500; color:var(--ocean-bright);}
+.hero-sub{margin-top:18px; font-size:17px; line-height:1.55; color:var(--ink-soft); max-width:46ch;}
+.hero-meta{display:flex; gap:28px; margin-top:32px; flex-wrap:wrap;}
+.hero-meta div{font-family:var(--mono);}
+.hero-meta .num{font-size:22px; font-weight:600; color:var(--ocean);}
+.hero-meta .lbl{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-faint); margin-top:2px;}
+#hero-map{
+  height:420px; border-radius:var(--radius); box-shadow:var(--shadow); border:6px solid var(--card);
+  position:relative; z-index:1;
+}
+.hero-tag{
+  position:absolute; z-index:2; background:var(--ink); color:var(--card); padding:10px 16px;
+  border-radius:12px; font-family:var(--mono); font-size:12px; box-shadow:var(--shadow);
+  bottom:-14px; left:24px; display:flex; align-items:center; gap:8px;
+}
+.hero-tag .dot{width:8px; height:8px; border-radius:50%; background:var(--optional);}
+
+/* ============ COUNTDOWN + STATS STRIP ============ */
+.stripwrap{padding:38px 0 10px;}
+.strip{
+  display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line);
+  border:1px solid var(--line); border-radius:18px; overflow:hidden;
+}
+.strip-cell{background:var(--card); padding:20px 18px;}
+.strip-cell .v{font-family:var(--mono); font-size:26px; font-weight:600; color:var(--ocean);}
+.strip-cell .k{font-size:12px; color:var(--ink-soft); margin-top:4px;}
+@media (max-width:820px){.strip{grid-template-columns:repeat(2,1fr);} .hero-grid{grid-template-columns:1fr;} #hero-map{height:300px;}}
+
+/* ============ SECTION HEADERS ============ */
+.section-head{padding:64px 0 24px; text-align:left;}
+.section-head h2{font-size:clamp(28px,4vw,42px); margin-top:10px;}
+.section-head p{color:var(--ink-soft); max-width:60ch; margin-top:10px; font-size:15px;}
+
+/* ============ DAY / BOARDING PASS CARD ============ */
+.day-section{scroll-margin-top:76px; padding:26px 0;}
+.pass{
+  display:grid; grid-template-columns:1fr 46px 1.15fr; background:var(--card);
+  border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; position:relative;
+  border:1px solid rgba(27,26,23,.06);
+  opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease;
+}
+.pass.inview{opacity:1; transform:translateY(0);}
+.pass.important{outline:2px solid var(--optional); outline-offset:-2px;}
+
+.pass-stub{padding:30px 32px 26px; display:flex; flex-direction:column; gap:18px;}
+.pass-code{font-family:var(--mono); font-size:12px; color:var(--ink-faint); display:flex; justify-content:space-between; align-items:center;}
+.pass-code .badge{background:var(--optional-bg); color:var(--optional); padding:3px 9px; border-radius:100px; font-weight:700; letter-spacing:.03em;}
+.pass-title h3{font-size:28px; font-weight:600;}
+.pass-title .region{font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--ocean-bright); margin-top:4px; display:block;}
+.pass-date{font-family:var(--mono); font-size:13px; color:var(--ink-soft);}
+
+.timeline{list-style:none; margin:6px 0 0; padding:0; display:flex; flex-direction:column; gap:0;}
+.timeline li{
+  position:relative; padding:0 0 18px 24px; border-left:1px solid var(--line); margin-left:5px;
+}
+.timeline li:last-child{border-left:1px solid transparent; padding-bottom:0;}
+.timeline li::before{
+  content:''; position:absolute; left:-6px; top:2px; width:11px; height:11px; border-radius:50%;
+  background:var(--ink-faint); border:2px solid var(--card);
+}
+.timeline li.st-booked::before{background:var(--booked);}
+.timeline li.st-optional::before{background:var(--optional);}
+.t-time{font-family:var(--mono); font-size:11px; color:var(--ink-faint); display:block;}
+.t-name{font-weight:600; font-size:14.5px;}
+.t-note{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+.t-tag{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em; padding:2px 7px; border-radius:100px; margin-left:6px; display:inline-block; vertical-align:middle;}
+.t-tag.booked{background:var(--booked-bg); color:var(--booked);}
+.t-tag.optional{background:var(--optional-bg); color:var(--optional);}
+
+.boxes{display:flex; flex-direction:column; gap:10px; margin-top:4px;}
+.box{border:1px solid var(--line); border-radius:14px; padding:13px 15px;}
+.box h4{font-family:var(--sans); font-size:11px; text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:6px;}
+.box.booked{border-color:rgba(46,107,69,.25); background:var(--booked-bg);}
+.box.booked h4{color:var(--booked);}
+.box.optional{border-color:rgba(193,96,31,.25); background:var(--optional-bg);}
+.box.optional h4{color:var(--optional);}
+.box.tips{background:var(--ocean-mist); border-color:rgba(15,61,60,.18);}
+.box.tips h4{color:var(--ocean);}
+.box ul{margin:0; padding-left:16px; font-size:13px; line-height:1.6; color:var(--ink-soft);}
+.box p{font-size:13px; line-height:1.6; color:var(--ink-soft);}
+
+.perforation{position:relative; background:transparent;}
+.perforation::before, .perforation::after{
+  content:''; position:absolute; left:50%; transform:translateX(-50%); width:26px; height:26px;
+  background:var(--bg); border-radius:50%; z-index:2;
+}
+.perforation::before{top:-13px;} .perforation::after{bottom:-13px;}
+.perf-line{position:absolute; top:20px; bottom:20px; left:50%; border-left:2px dashed var(--line);}
+
+.pass-map-wrap{padding:20px 20px 20px 0; display:flex; flex-direction:column; gap:12px;}
+.pass-map{height:340px; border-radius:14px; overflow:hidden; border:1px solid var(--line);}
+.pass-map-foot{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:0 4px;}
+.metrics{display:flex; gap:16px; font-family:var(--mono); font-size:12px; color:var(--ink-soft);}
+.metrics b{color:var(--ink); font-size:14px; display:block;}
+.gmaps-btn{
+  font-family:var(--sans); font-size:13px; font-weight:600; color:#fff; background:var(--ocean);
+  padding:9px 16px; border-radius:100px; text-decoration:none; display:inline-flex; align-items:center; gap:7px;
+  transition:.2s ease; white-space:nowrap;
+}
+.gmaps-btn:hover{background:var(--ocean-bright);}
+
+@media (max-width:900px){
+  .pass{grid-template-columns:1fr;}
+  .perforation{display:none;}
+  .pass-map-wrap{padding:0 22px 26px;}
+  .pass-stub{padding:26px 22px 6px;}
+}
+
+/* leaflet marker styling */
+.mk{
+  width:26px; height:26px; border-radius:50% 50% 50% 0; transform:rotate(-45deg);
+  display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 8px rgba(0,0,0,.3);
+}
+.mk span{transform:rotate(45deg); font-family:var(--mono); font-size:10px; font-weight:700; color:#fff;}
+.mk.neutral{background:var(--ink);}
+.mk.booked{background:var(--booked);}
+.mk.optional{background:var(--optional);}
+.leaflet-popup-content{font-family:var(--sans); font-size:13px;}
+.leaflet-popup-content b{font-family:var(--serif);}
+
+/* ============ EXTRA OPTIONALS ============ */
+.extras{padding:20px 0 10px;}
+.extra-cols{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+.extra-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px;}
+.extra-card h4{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--optional); margin-bottom:12px;}
+.extra-card ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+.extra-card li{font-size:13.5px; padding-left:16px; position:relative;}
+.extra-card li::before{content:'○'; position:absolute; left:0; color:var(--optional); font-size:10px; top:4px;}
+@media (max-width:780px){.extra-cols{grid-template-columns:1fr;}}
+
+/* ============ FOOTER ============ */
+footer{background:var(--ink); color:#f2ede0; margin-top:70px; padding:60px 0 30px;}
+.foot-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:34px;}
+.foot-col h4{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:#c9c2a8; margin-bottom:16px;}
+.check-item{display:flex; align-items:center; gap:9px; font-size:13.5px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,.08);}
+.check-item input{accent-color:var(--ocean-bright); width:15px; height:15px;}
+.wx{display:flex; align-items:center; gap:14px; padding:14px; background:rgba(255,255,255,.05); border-radius:12px; margin-bottom:10px;}
+.wx .t{font-family:var(--mono); font-size:26px; font-weight:600;}
+.wx .d{font-size:12px; color:#c9c2a8; line-height:1.5;}
+.budget-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0; font-size:13.5px;}
+.budget-row input[type=number]{
+  width:72px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:8px;
+  color:#fff; font-family:var(--mono); padding:5px 7px; text-align:right;
+}
+.budget-total{display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,.15); font-weight:700; font-family:var(--mono);}
+.foot-col a{display:block; font-size:13.5px; padding:6px 0; color:#e7e1cf; text-decoration:none; border-bottom:1px solid rgba(255,255,255,.08);}
+.foot-col a:hover{color:var(--ocean-bright);}
+.foot-bottom{margin-top:46px; padding-top:20px; border-top:1px solid rgba(255,255,255,.1); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12px; color:#a39c82; font-family:var(--mono);}
+@media (max-width:900px){.foot-grid{grid-template-columns:1fr 1fr; row-gap:40px;}}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="brand">TFS<span>· Tenerife 15→21 Ago</span></div>
+    <div class="daypills" id="daypills"></div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">Diario di viaggio · Isole Canarie</p>
+      <h1>Sette giorni,<br><em>un solo vulcano</em><br>all'orizzonte.</h1>
+      <p class="hero-sub">Da Playa de Las Americas al Teide, dai fondali di Las Galletas ai borghi di lava del nord. Itinerario giorno per giorno con percorsi, tempi di guida e attività — pronto da seguire, facile da cambiare.</p>
+      <div class="hero-meta">
+        <div><div class="num">7</div><div class="lbl">Giorni</div></div>
+        <div><div class="num">TFS</div><div class="lbl">Aeroporto</div></div>
+        <div><div class="num">21/08</div><div class="lbl">Rientro 15:30</div></div>
+        <div><div class="num" id="stat-km">—</div><div class="lbl">Km stimati</div></div>
+      </div>
+    </div>
+    <div style="position:relative;">
+      <div id="hero-map"></div>
+      <div class="hero-tag"><span class="dot"></span> tocca un giorno sulla mappa</div>
+    </div>
+  </div>
+</header>
+
+<div class="stripwrap wrap">
+  <div class="strip" id="stat-strip"></div>
+</div>
+
+<main class="wrap">
+  <div class="section-head">
+    <p class="eyebrow">Itinerario</p>
+    <h2>Le tappe, giorno per giorno.</h2>
+    <p>Verde = attività prenotata. Arancione = opzionale, da valutare sul momento in base a meteo e tempo a disposizione.</p>
+  </div>
+
+  <div id="days-container"></div>
+
+  <div class="extras">
+    <div class="section-head" style="padding-top:20px;">
+      <p class="eyebrow">Fuori programma</p>
+      <h2>Altre soste possibili, per zona.</h2>
+      <p>Non collegate a un giorno preciso: da inserire al volo se avanza tempo o cambia il piano.</p>
+    </div>
+    <div class="extra-cols" id="extra-cols"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <h4>Checklist</h4>
+        <div id="checklist"></div>
+      </div>
+      <div class="foot-col">
+        <h4>Documenti</h4>
+        <div id="documents"></div>
+      </div>
+      <div class="foot-col">
+        <h4>Meteo · Sud, metà Agosto</h4>
+        <div class="wx"><div class="t">27°</div><div class="d">Sole quasi costante, pioggia praticamente assente. Vento moderato (alisei) sulla costa sud-ovest. Notti sui 20-21°.</div></div>
+        <div class="wx"><div class="t">14°</div><div class="d">Al Teide (2.300 m+) le temperature scendono molto: felpa e giacca a vento anche in piena estate.</div></div>
+      </div>
+      <div class="foot-col">
+        <h4>Budget stimato</h4>
+        <div id="budget"></div>
+        <div class="budget-total"><span>Totale</span><span id="budget-total">€ 0</span></div>
+      </div>
+    </div>
+    <div class="foot-grid" style="margin-top:40px;">
+      <div class="foot-col" style="grid-column:span 2;">
+        <h4>Link utili</h4>
+        <a href="https://www.webtenerife.com" target="_blank" rel="noopener">Webtenerife — turismo ufficiale ↗</a>
+        <a href="https://www.aena.es/en/tenerife-sur.html" target="_blank" rel="noopener">AENA — Aeroporto Tenerife Sud (TFS) ↗</a>
+        <a href="https://www.loroparque.com" target="_blank" rel="noopener">Loro Parque — orari e biglietti ↗</a>
+        <a href="https://www.siampark.net" target="_blank" rel="noopener">Siam Park — orari e biglietti ↗</a>
+        <a href="https://www.openstreetmap.org" target="_blank" rel="noopener">OpenStreetMap — dati mappa ↗</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>Tenerife Travel Guide · uso personale</span>
+      <span>Mappe © OpenStreetMap contributors</span>
+    </div>
+  </div>
+</footer>
+
+</script>
+<style>
+/* ============ DESIGN TOKENS ============ */
+:root{
+  --bg:#F2E8D3;
+  --bg-alt:#E8DAB8;
+  --card:#FBF6E9;
+  --ink:#1B1A17;
+  --ink-soft:#55503f;
+  --ink-faint:#8a8471;
+  --ocean:#0F3D3C;
+  --ocean-bright:#1C7A72;
+  --ocean-mist:#DCEAE6;
+  --booked:#2E6B45;
+  --booked-bg:#E3EEE1;
+  --optional:#C1601F;
+  --optional-bg:#F6E5D3;
+  --line:rgba(27,26,23,.14);
+  --shadow:0 18px 40px -20px rgba(15,26,25,.35);
+  --radius:22px;
+  --serif:'Fraunces', serif;
+  --sans:'Inter', sans-serif;
+  --mono:'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation:none !important; transition:none !important;} }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(circle at 10% 0%, rgba(15,61,60,.06), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(193,96,31,.05), transparent 35%);
+}
+h1,h2,h3,h4{font-family:var(--serif); margin:0; letter-spacing:-0.01em;}
+p{margin:0;}
+a{color:inherit;}
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+::selection{background:var(--ocean-bright); color:#fff;}
+:focus-visible{outline:3px solid var(--ocean-bright); outline-offset:3px; border-radius:4px;}
+
+/* ============ EYEBROW / LABEL ============ */
+.eyebrow{
+  font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ocean-bright); font-weight:600; display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{content:''; width:16px; height:1px; background:var(--ocean-bright); display:inline-block;}
+
+/* ============ NAV / DAY SELECTOR ============ */
+.topnav{
+  position:sticky; top:0; z-index:50; background:rgba(242,232,211,.88);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+}
+.topnav-inner{display:flex; align-items:center; gap:18px; padding:12px 24px; max-width:1180px; margin:0 auto;}
+.brand{font-family:var(--serif); font-weight:600; font-size:17px; white-space:nowrap; display:flex; align-items:baseline; gap:6px;}
+.brand span{font-family:var(--mono); font-size:11px; color:var(--ink-faint); font-weight:500;}
+.daypills{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding:2px;}
+.daypills::-webkit-scrollbar{display:none;}
+.pill{
+  font-family:var(--mono); font-size:12px; font-weight:600; white-space:nowrap;
+  padding:7px 12px; border-radius:100px; border:1px solid var(--line); background:transparent;
+  color:var(--ink-soft); cursor:pointer; transition:.2s ease;
+}
+.pill:hover{border-color:var(--ocean-bright); color:var(--ocean);}
+.pill.active{background:var(--ocean); color:#fff; border-color:var(--ocean);}
+
+/* ============ HERO ============ */
+.hero{position:relative; padding:76px 0 40px; overflow:hidden;}
+.hero-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:56px; align-items:center;}
+.hero h1{font-size:clamp(40px,6vw,68px); line-height:.98; font-weight:600;}
+.hero h1 em{font-style:italic; font-weight:500; color:var(--ocean-bright);}
+.hero-sub{margin-top:18px; font-size:17px; line-height:1.55; color:var(--ink-soft); max-width:46ch;}
+.hero-meta{display:flex; gap:28px; margin-top:32px; flex-wrap:wrap;}
+.hero-meta div{font-family:var(--mono);}
+.hero-meta .num{font-size:22px; font-weight:600; color:var(--ocean);}
+.hero-meta .lbl{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-faint); margin-top:2px;}
+#hero-map{
+  height:420px; border-radius:var(--radius); box-shadow:var(--shadow); border:6px solid var(--card);
+  position:relative; z-index:1;
+}
+.hero-tag{
+  position:absolute; z-index:2; background:var(--ink); color:var(--card); padding:10px 16px;
+  border-radius:12px; font-family:var(--mono); font-size:12px; box-shadow:var(--shadow);
+  bottom:-14px; left:24px; display:flex; align-items:center; gap:8px;
+}
+.hero-tag .dot{width:8px; height:8px; border-radius:50%; background:var(--optional);}
+
+/* ============ COUNTDOWN + STATS STRIP ============ */
+.stripwrap{padding:38px 0 10px;}
+.strip{
+  display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line);
+  border:1px solid var(--line); border-radius:18px; overflow:hidden;
+}
+.strip-cell{background:var(--card); padding:20px 18px;}
+.strip-cell .v{font-family:var(--mono); font-size:26px; font-weight:600; color:var(--ocean);}
+.strip-cell .k{font-size:12px; color:var(--ink-soft); margin-top:4px;}
+@media (max-width:820px){.strip{grid-template-columns:repeat(2,1fr);} .hero-grid{grid-template-columns:1fr;} #hero-map{height:300px;}}
+
+/* ============ SECTION HEADERS ============ */
+.section-head{padding:64px 0 24px; text-align:left;}
+.section-head h2{font-size:clamp(28px,4vw,42px); margin-top:10px;}
+.section-head p{color:var(--ink-soft); max-width:60ch; margin-top:10px; font-size:15px;}
+
+/* ============ DAY / BOARDING PASS CARD ============ */
+.day-section{scroll-margin-top:76px; padding:26px 0;}
+.pass{
+  display:grid; grid-template-columns:1fr 46px 1.15fr; background:var(--card);
+  border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; position:relative;
+  border:1px solid rgba(27,26,23,.06);
+  opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease;
+}
+.pass.inview{opacity:1; transform:translateY(0);}
+.pass.important{outline:2px solid var(--optional); outline-offset:-2px;}
+
+.pass-stub{padding:30px 32px 26px; display:flex; flex-direction:column; gap:18px;}
+.pass-code{font-family:var(--mono); font-size:12px; color:var(--ink-faint); display:flex; justify-content:space-between; align-items:center;}
+.pass-code .badge{background:var(--optional-bg); color:var(--optional); padding:3px 9px; border-radius:100px; font-weight:700; letter-spacing:.03em;}
+.pass-title h3{font-size:28px; font-weight:600;}
+.pass-title .region{font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--ocean-bright); margin-top:4px; display:block;}
+.pass-date{font-family:var(--mono); font-size:13px; color:var(--ink-soft);}
+
+.timeline{list-style:none; margin:6px 0 0; padding:0; display:flex; flex-direction:column; gap:0;}
+.timeline li{
+  position:relative; padding:0 0 18px 24px; border-left:1px solid var(--line); margin-left:5px;
+}
+.timeline li:last-child{border-left:1px solid transparent; padding-bottom:0;}
+.timeline li::before{
+  content:''; position:absolute; left:-6px; top:2px; width:11px; height:11px; border-radius:50%;
+  background:var(--ink-faint); border:2px solid var(--card);
+}
+.timeline li.st-booked::before{background:var(--booked);}
+.timeline li.st-optional::before{background:var(--optional);}
+.t-time{font-family:var(--mono); font-size:11px; color:var(--ink-faint); display:block;}
+.t-name{font-weight:600; font-size:14.5px;}
+.t-note{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+.t-tag{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em; padding:2px 7px; border-radius:100px; margin-left:6px; display:inline-block; vertical-align:middle;}
+.t-tag.booked{background:var(--booked-bg); color:var(--booked);}
+.t-tag.optional{background:var(--optional-bg); color:var(--optional);}
+
+.boxes{display:flex; flex-direction:column; gap:10px; margin-top:4px;}
+.box{border:1px solid var(--line); border-radius:14px; padding:13px 15px;}
+.box h4{font-family:var(--sans); font-size:11px; text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:6px;}
+.box.booked{border-color:rgba(46,107,69,.25); background:var(--booked-bg);}
+.box.booked h4{color:var(--booked);}
+.box.optional{border-color:rgba(193,96,31,.25); background:var(--optional-bg);}
+.box.optional h4{color:var(--optional);}
+.box.tips{background:var(--ocean-mist); border-color:rgba(15,61,60,.18);}
+.box.tips h4{color:var(--ocean);}
+.box ul{margin:0; padding-left:16px; font-size:13px; line-height:1.6; color:var(--ink-soft);}
+.box p{font-size:13px; line-height:1.6; color:var(--ink-soft);}
+
+.perforation{position:relative; background:transparent;}
+.perforation::before, .perforation::after{
+  content:''; position:absolute; left:50%; transform:translateX(-50%); width:26px; height:26px;
+  background:var(--bg); border-radius:50%; z-index:2;
+}
+.perforation::before{top:-13px;} .perforation::after{bottom:-13px;}
+.perf-line{position:absolute; top:20px; bottom:20px; left:50%; border-left:2px dashed var(--line);}
+
+.pass-map-wrap{padding:20px 20px 20px 0; display:flex; flex-direction:column; gap:12px;}
+.pass-map{height:340px; border-radius:14px; overflow:hidden; border:1px solid var(--line);}
+.pass-map-foot{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:0 4px;}
+.metrics{display:flex; gap:16px; font-family:var(--mono); font-size:12px; color:var(--ink-soft);}
+.metrics b{color:var(--ink); font-size:14px; display:block;}
+.gmaps-btn{
+  font-family:var(--sans); font-size:13px; font-weight:600; color:#fff; background:var(--ocean);
+  padding:9px 16px; border-radius:100px; text-decoration:none; display:inline-flex; align-items:center; gap:7px;
+  transition:.2s ease; white-space:nowrap;
+}
+.gmaps-btn:hover{background:var(--ocean-bright);}
+
+@media (max-width:900px){
+  .pass{grid-template-columns:1fr;}
+  .perforation{display:none;}
+  .pass-map-wrap{padding:0 22px 26px;}
+  .pass-stub{padding:26px 22px 6px;}
+}
+
+/* leaflet marker styling */
+.mk{
+  width:26px; height:26px; border-radius:50% 50% 50% 0; transform:rotate(-45deg);
+  display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 8px rgba(0,0,0,.3);
+}
+.mk span{transform:rotate(45deg); font-family:var(--mono); font-size:10px; font-weight:700; color:#fff;}
+.mk.neutral{background:var(--ink);}
+.mk.booked{background:var(--booked);}
+.mk.optional{background:var(--optional);}
+.leaflet-popup-content{font-family:var(--sans); font-size:13px;}
+.leaflet-popup-content b{font-family:var(--serif);}
+
+/* ============ EXTRA OPTIONALS ============ */
+.extras{padding:20px 0 10px;}
+.extra-cols{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+.extra-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px;}
+.extra-card h4{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--optional); margin-bottom:12px;}
+.extra-card ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+.extra-card li{font-size:13.5px; padding-left:16px; position:relative;}
+.extra-card li::before{content:'○'; position:absolute; left:0; color:var(--optional); font-size:10px; top:4px;}
+@media (max-width:780px){.extra-cols{grid-template-columns:1fr;}}
+
+/* ============ FOOTER ============ */
+footer{background:var(--ink); color:#f2ede0; margin-top:70px; padding:60px 0 30px;}
+.foot-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:34px;}
+.foot-col h4{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:#c9c2a8; margin-bottom:16px;}
+.check-item{display:flex; align-items:center; gap:9px; font-size:13.5px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,.08);}
+.check-item input{accent-color:var(--ocean-bright); width:15px; height:15px;}
+.wx{display:flex; align-items:center; gap:14px; padding:14px; background:rgba(255,255,255,.05); border-radius:12px; margin-bottom:10px;}
+.wx .t{font-family:var(--mono); font-size:26px; font-weight:600;}
+.wx .d{font-size:12px; color:#c9c2a8; line-height:1.5;}
+.budget-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0; font-size:13.5px;}
+.budget-row input[type=number]{
+  width:72px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:8px;
+  color:#fff; font-family:var(--mono); padding:5px 7px; text-align:right;
+}
+.budget-total{display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,.15); font-weight:700; font-family:var(--mono);}
+.foot-col a{display:block; font-size:13.5px; padding:6px 0; color:#e7e1cf; text-decoration:none; border-bottom:1px solid rgba(255,255,255,.08);}
+.foot-col a:hover{color:var(--ocean-bright);}
+.foot-bottom{margin-top:46px; padding-top:20px; border-top:1px solid rgba(255,255,255,.1); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12px; color:#a39c82; font-family:var(--mono);}
+@media (max-width:900px){.foot-grid{grid-template-columns:1fr 1fr; row-gap:40px;}}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="brand">TFS<span>· Tenerife 15→21 Ago</span></div>
+    <div class="daypills" id="daypills"></div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">Diario di viaggio · Isole Canarie</p>
+      <h1>Sette giorni,<br><em>un solo vulcano</em><br>all'orizzonte.</h1>
+      <p class="hero-sub">Da Playa de Las Americas al Teide, dai fondali di Las Galletas ai borghi di lava del nord. Itinerario giorno per giorno con percorsi, tempi di guida e attività — pronto da seguire, facile da cambiare.</p>
+      <div class="hero-meta">
+        <div><div class="num">7</div><div class="lbl">Giorni</div></div>
+        <div><div class="num">TFS</div><div class="lbl">Aeroporto</div></div>
+        <div><div class="num">21/08</div><div class="lbl">Rientro 15:30</div></div>
+        <div><div class="num" id="stat-km">—</div><div class="lbl">Km stimati</div></div>
+      </div>
+    </div>
+    <div style="position:relative;">
+      <div id="hero-map"></div>
+      <div class="hero-tag"><span class="dot"></span> tocca un giorno sulla mappa</div>
+    </div>
+  </div>
+</header>
+
+<div class="stripwrap wrap">
+  <div class="strip" id="stat-strip"></div>
+</div>
+
+<main class="wrap">
+  <div class="section-head">
+    <p class="eyebrow">Itinerario</p>
+    <h2>Le tappe, giorno per giorno.</h2>
+    <p>Verde = attività prenotata. Arancione = opzionale, da valutare sul momento in base a meteo e tempo a disposizione.</p>
+  </div>
+
+  <div id="days-container"></div>
+
+  <div class="extras">
+    <div class="section-head" style="padding-top:20px;">
+      <p class="eyebrow">Fuori programma</p>
+      <h2>Altre soste possibili, per zona.</h2>
+      <p>Non collegate a un giorno preciso: da inserire al volo se avanza tempo o cambia il piano.</p>
+    </div>
+    <div class="extra-cols" id="extra-cols"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <h4>Checklist</h4>
+        <div id="checklist"></div>
+      </div>
+      <div class="foot-col">
+        <h4>Documenti</h4>
+        <div id="documents"></div>
+      </div>
+      <div class="foot-col">
+        <h4>Meteo · Sud, metà Agosto</h4>
+        <div class="wx"><div class="t">27°</div><div class="d">Sole quasi costante, pioggia praticamente assente. Vento moderato (alisei) sulla costa sud-ovest. Notti sui 20-21°.</div></div>
+        <div class="wx"><div class="t">14°</div><div class="d">Al Teide (2.300 m+) le temperature scendono molto: felpa e giacca a vento anche in piena estate.</div></div>
+      </div>
+      <div class="foot-col">
+        <h4>Budget stimato</h4>
+        <div id="budget"></div>
+        <div class="budget-total"><span>Totale</span><span id="budget-total">€ 0</span></div>
+      </div>
+    </div>
+    <div class="foot-grid" style="margin-top:40px;">
+      <div class="foot-col" style="grid-column:span 2;">
+        <h4>Link utili</h4>
+        <a href="https://www.webtenerife.com" target="_blank" rel="noopener">Webtenerife — turismo ufficiale ↗</a>
+        <a href="https://www.aena.es/en/tenerife-sur.html" target="_blank" rel="noopener">AENA — Aeroporto Tenerife Sud (TFS) ↗</a>
+        <a href="https://www.loroparque.com" target="_blank" rel="noopener">Loro Parque — orari e biglietti ↗</a>
+        <a href="https://www.siampark.net" target="_blank" rel="noopener">Siam Park — orari e biglietti ↗</a>
+        <a href="https://www.openstreetmap.org" target="_blank" rel="noopener">OpenStreetMap — dati mappa ↗</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>Tenerife Travel Guide · uso personale</span>
+      <span>Mappe © OpenStreetMap contributors</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   DATI DI VIAGGIO
+   ============================================================ */
+const TRIP_START = new Date(2026,7,15,0,0,0); // 15 Agosto 2026
+const RETURN_FLIGHT = new Date(2026,7,21,15,30,0);
+
+const days = [
+  {
+    id:1, code:'TFS-01', date:'Sab 15 Agosto', title:'Primo contatto', region:'Sud',
+    km:22, drive:'40 min',
+    booked:['Ritiro auto a noleggio','Check-in hotel — Playa de Las Americas'],
+    optional:[],
+    tips:['Ritira l’auto in aeroporto e vai dritto in hotel: primo giorno leggero per smaltire il viaggio.','Cena al tramonto verso Papagayo, guardando verso La Gomera.'],
+    stops:[
+      {name:'Playa de Las Americas', lat:28.0567, lng:-16.7292, status:'neutral', time:'Pomeriggio', note:'Check-in hotel'},
+      {name:'Costa Adeje', lat:28.0916, lng:-16.7460, status:'neutral', time:'', note:'Passeggiata lungo il lungomare'},
+      {name:'Playa Amarilla', lat:28.0625, lng:-16.6494, status:'optional', time:'', note:'Spiaggia di sabbia dorata (opzionale)'},
+      {name:'Abades', lat:28.1101, lng:-16.5977, status:'neutral', time:'', note:'Borgo di pescatori sulla costa sud'},
+      {name:'Papagayo (Punta Rasca)', lat:28.0026, lng:-16.6547, status:'neutral', time:'Sera', note:'Tramonto sul faro, vista La Gomera'}
+    ]
+  },
+  {
+    id:2, code:'TFS-02', date:'Dom 16 Agosto', title:'Sopra le nuvole', region:'Teide', important:false,
+    km:145, drive:'2h 30m',
+    booked:['Escursione in quad sul Teide'],
+    optional:[],
+    tips:['Porta una felpa: sopra i 2.000 m le temperature scendono anche in agosto.','Scarpe chiuse obbligatorie per il quad.','Porta abbastanza acqua: l’aria secca in quota disidrata più del previsto.'],
+    stops:[
+      {name:'Hotel — partenza', lat:28.0567, lng:-16.7292, status:'neutral', time:'Mattina presto', note:''},
+      {name:'Mirador del Teide', lat:28.2361, lng:-16.6414, status:'neutral', time:'', note:'Primo sguardo sul vulcano'},
+      {name:'Parco Nazionale del Teide', lat:28.2723, lng:-16.6418, status:'neutral', time:'', note:'Paesaggio lunare, colate laviche'},
+      {name:'View Point', lat:28.2716, lng:-16.6425, status:'neutral', time:'', note:'Sosta panoramica'},
+      {name:'Escursione Quad', lat:28.1850, lng:-16.7500, status:'booked', time:'Pomeriggio', note:'Attività prenotata'}
+    ]
+  },
+  {
+    id:3, code:'TFS-03', date:'Lun 17 Agosto', title:'Al largo', region:'Costa Sud',
+    km:38, drive:'1h 10m',
+    booked:['Escursione Delfini — Las Galletas'],
+    optional:['Cueva La Vaca'],
+    tips:['Imbarco puntuale a Las Galletas: arriva con 20 minuti di anticipo.','Porta un cambio: si torna bagnati.'],
+    stops:[
+      {name:'Hotel — partenza', lat:28.0567, lng:-16.7292, status:'neutral', time:'Mattina', note:''},
+      {name:'Las Galletas', lat:28.0225, lng:-16.6796, status:'neutral', time:'', note:'Porticciolo, punto d’imbarco'},
+      {name:'Escursione Delfini', lat:28.0050, lng:-16.6650, status:'booked', time:'', note:'Attività prenotata'},
+      {name:'Bufadero Costa Adeje', lat:28.0967, lng:-16.7796, status:'neutral', time:'', note:'Soffioni di roccia vulcanica'},
+      {name:'Cueva La Vaca', lat:28.2427, lng:-16.8384, status:'optional', time:'', note:'Grotta costiera (opzionale, se avanza tempo)'}
+    ]
+  },
+  {
+    id:4, code:'TFS-04', date:'Mar 18 Agosto', title:'Verso il verde', region:'Nord',
+    km:150, drive:'2h 00m',
+    booked:['Loro Parque'],
+    optional:['Mirador Playa Los Roques','Elevador de Agua de Gordejuela','Playa Castro','Social La Quinta Garden'],
+    tips:['Giornata lunga: parti presto per sfruttare bene Loro Parque prima della folla di mezzogiorno.','Puerto de la Cruz è ottimo per pranzo — piscine naturali di Lago Martianez per il pomeriggio.'],
+    stops:[
+      {name:'Hotel — partenza', lat:28.0567, lng:-16.7292, status:'neutral', time:'Presto', note:''},
+      {name:'Loro Parque', lat:28.4085, lng:-16.5713, status:'booked', time:'Mattina', note:'Attività prenotata'},
+      {name:'Puerto de la Cruz', lat:28.4130, lng:-16.5451, status:'neutral', time:'Pranzo', note:'Centro storico e porto'},
+      {name:'Lago Martianez', lat:28.4144, lng:-16.5479, status:'neutral', time:'Pomeriggio', note:'Piscine naturali disegnate da César Manrique'},
+      {name:'Mirador Playa Los Roques', lat:28.3868, lng:-16.5252, status:'optional', time:'', note:'Opzionale'},
+      {name:'Elevador de Agua de Gordejuela', lat:28.4180, lng:-16.5390, status:'optional', time:'', note:'Opzionale'},
+      {name:'Playa Castro', lat:28.4215, lng:-16.5320, status:'optional', time:'', note:'Opzionale'},
+      {name:'Social La Quinta Garden', lat:28.4100, lng:-16.5480, status:'optional', time:'', note:'Opzionale'}
+    ]
+  },
+  {
+    id:5, code:'TFS-05', date:'Mer 19 Agosto', title:'Acqua e scivoli', region:'Sud',
+    km:16, drive:'25 min',
+    booked:['Siam Park'],
+    optional:[],
+    tips:['Arriva all’apertura: gli scivoli più famosi hanno code lunghe da metà mattina.','Crema solare resistente all’acqua, riapplicata spesso.'],
+    stops:[
+      {name:'Hotel — partenza', lat:28.0567, lng:-16.7292, status:'neutral', time:'Mattina', note:''},
+      {name:'Siam Park', lat:28.0783, lng:-16.7423, status:'booked', time:'', note:'Attività prenotata — giornata intera'},
+      {name:'Costa Adeje', lat:28.0916, lng:-16.7460, status:'neutral', time:'Sera', note:'Aperitivo sul lungomare'},
+      {name:'Playa de Las Americas', lat:28.0567, lng:-16.7292, status:'neutral', time:'', note:'Rientro in hotel'}
+    ]
+  },
+  {
+    id:6, code:'TFS-06', date:'Gio 20 Agosto', title:'La strada più bella', region:'Road trip', important:true,
+    km:185, drive:'4h 15m',
+    booked:[],
+    optional:['Mirador 500 Scalones'],
+    tips:['Strade strette e tornanti fino a Masca: parti presto, prima dei bus turistici.','Punta de Teno può chiudere al traffico privato in alta stagione — verifica l’accesso il giorno prima.','Pieno di carburante prima di partire: pochi distributori lungo il percorso.'],
+    stops:[
+      {name:'Los Gigantes', lat:28.2424, lng:-16.8399, status:'neutral', time:'Mattina presto', note:'Falesie a picco sul mare'},
+      {name:'Cueva La Vaca', lat:28.2427, lng:-16.8384, status:'neutral', time:'', note:'Seconda tappa costiera'},
+      {name:'Masca', lat:28.2839, lng:-16.8244, status:'neutral', time:'', note:'Borgo tra le gole vulcaniche'},
+      {name:'Punta de Teno', lat:28.3444, lng:-16.9098, status:'neutral', time:'', note:'Faro all’estremo nord-ovest'},
+      {name:'Garachico', lat:28.3706, lng:-16.7642, status:'neutral', time:'Pranzo', note:'Piscine naturali laviche'},
+      {name:'Drago Millenario, Icod', lat:28.3714, lng:-16.7202, status:'neutral', time:'', note:'Il drago millenario simbolo dell’isola'},
+      {name:'Charco de La Laja', lat:28.3823, lng:-16.6905, status:'neutral', time:'', note:'Piscina naturale di scogliera'},
+      {name:'Mirador 500 Scalones', lat:28.3600, lng:-16.7000, status:'optional', time:'', note:'Opzionale, se resta luce'}
+    ]
+  },
+  {
+    id:7, code:'TFS-07', date:'Ven 21 Agosto', title:'Rientro', region:'Rientro',
+    km:190, drive:'2h 10m',
+    booked:['Volo di rientro 15:30'],
+    optional:[],
+    tips:['Nessun’altra tappa oltre a quelle indicate: giornata calcolata per arrivare in aeroporto con margine.','Check-out entro l’orario hotel, bagagli in auto prima di partire per Las Teresitas.'],
+    stops:[
+      {name:'Check-out hotel', lat:28.0567, lng:-16.7292, status:'neutral', time:'Mattina', note:''},
+      {name:'Playa Las Teresitas', lat:28.5107, lng:-16.1974, status:'neutral', time:'', note:'Ultima spiaggia, sabbia dorata dal Sahara'},
+      {name:'Aeroporto Tenerife Sud (TFS)', lat:28.0445, lng:-16.5725, status:'neutral', time:'13:30', note:'Volo ore 15:30'}
+    ]
+  }
+];
+
+const extras = {
+  'Sud':['Siam Mall','Playa Amarilla','Playa de Las Americas','Dragon Tree'],
+  'Nord':['San Cristóbal de La Laguna','Santa Cruz de Tenerife','Mirador Pico del Inglés'],
+  'Centro':['Playa El Bollullo']
+};
+
+/* ============================================================
+   UTIL
+   ============================================================ */
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function statusTagHtml(status){
+  if(status==='booked') return '<span class="t-tag booked">prenotato</span>';
+  if(status==='optional') return '<span class="t-tag optional">opzionale</span>';
+  return '';
+}
+function gmapsUrl(stops){
+  const pts = stops.map(s=>`${s.lat},${s.lng}`).join('/');
+  return `https://www.google.com/maps/dir/${pts}`;
+}
+
+/* ============================================================
+   RENDER: NAV PILLS
+   ============================================================ */
+const pillsEl = document.getElementById('daypills');
+days.forEach(d=>{
+  const b=document.createElement('button');
+  b.className='pill'; b.textContent=`${d.id.toString().padStart(2,'0')} · ${d.title}`;
+  b.addEventListener('click',()=>document.getElementById('day-'+d.id).scrollIntoView({behavior:'smooth'}));
+  b.dataset.day=d.id;
+  pillsEl.appendChild(b);
+});
+
+/* ============================================================
+   RENDER: DAY CARDS
+   ============================================================ */
+const container = document.getElementById('days-container');
+days.forEach(d=>{
+  const section=document.createElement('section');
+  section.className='day-section'; section.id='day-'+d.id;
+
+  const timelineHtml = d.stops.map(s=>`
+    <li class="${s.status==='booked'?'st-booked':(s.status==='optional'?'st-optional':'')}">
+      ${s.time?`<span class="t-time">${escapeHtml(s.time)}</span>`:''}
+      <span class="t-name">${escapeHtml(s.name)}</span>${statusTagHtml(s.status)}
+      ${s.note?`<div class="t-note">${escapeHtml(s.note)}</div>`:''}
+    </li>`).join('');
+
+  const bookedBox = d.booked.length? `<div class="box booked"><h4>✓ Prenotato</h4><ul>${d.booked.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div>`:'';
+  const optionalBox = d.optional.length? `<div class="box optional"><h4>◐ Opzionali</h4><ul>${d.optional.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div>`:'';
+  const tipsBox = d.tips.length? `<div class="box tips"><h4>◎ Consigli</h4><ul>${d.tips.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div>`:'';
+
+  section.innerHTML = `
+    <div class="pass ${d.important?'important':''}">
+      <div class="pass-stub">
+        <div class="pass-code">
+          <span>${d.code} · IMBARCO</span>
+          ${d.important?'<span class="badge">Giorno clou</span>':''}
+        </div>
+        <div class="pass-title">
+          <h3>${escapeHtml(d.title)}</h3>
+          <span class="region">${escapeHtml(d.region)}</span>
+        </div>
+        <div class="pass-date">${escapeHtml(d.date)}</div>
+        <ul class="timeline">${timelineHtml}</ul>
+        <div class="boxes">${bookedBox}${optionalBox}${tipsBox}</div>
+      </div>
+      <div class="perforation"><div class="perf-line"></div></div>
+      <div class="pass-map-wrap">
+        <div class="pass-map" id="map-day-${d.id}"></div>
+        <div class="pass-map-foot">
+          <div class="metrics">
+            <div><b>${d.km} km</b>indicativi</div>
+            <div><b>${d.drive}</b>di guida</div>
+          </div>
+          <a class="gmaps-btn" target="_blank" rel="noopener" href="${gmapsUrl(d.stops)}">Apri su Google Maps ↗</a>
+        </div>
+      </div>
+    </div>
+  `;
+  container.appendChild(section);
+});
+
+/* ============================================================
+   LEAFLET: MAPPE GIORNALIERE
+   ============================================================ */
+function makeIcon(status, num){
+  const cls = status==='booked'?'booked':(status==='optional'?'optional':'neutral');
+  return L.divIcon({
+    html:`<div class="mk ${cls}"><span>${num}</span></div>`,
+    className:'', iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-24]
+  });
+}
+days.forEach(d=>{
+  const map = L.map('map-day-'+d.id, {scrollWheelZoom:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'&copy; OpenStreetMap contributors', maxZoom:18
+  }).addTo(map);
+
+  const latlngs = d.stops.map(s=>[s.lat,s.lng]);
+  L.polyline(latlngs, {color:'#0F3D3C', weight:3.5, opacity:.8, lineJoin:'round'}).addTo(map);
+
+  d.stops.forEach((s,i)=>{
+    L.marker([s.lat,s.lng], {icon:makeIcon(s.status,i+1)})
+      .addTo(map)
+      .bindPopup(`<b>${escapeHtml(s.name)}</b><br>${escapeHtml(s.note||'')}`);
+  });
+  map.fitBounds(latlngs, {padding:[26,26]});
+  map.on('focus', ()=>map.scrollWheelZoom.enable());
+  map.on('blur', ()=>map.scrollWheelZoom.disable());
+});
+
+/* ============================================================
+   LEAFLET: MAPPA GENERALE (HERO)
+   ============================================================ */
+const heroMap = L.map('hero-map', {scrollWheelZoom:false}).setView([28.25,-16.62],9.3);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution:'&copy; OpenStreetMap contributors', maxZoom:18
+}).addTo(heroMap);
+days.forEach(d=>{
+  const anchor = d.stops[0];
+  L.marker([anchor.lat,anchor.lng], {icon:makeIcon('neutral', d.id)})
+    .addTo(heroMap)
+    .bindPopup(`<b>Giorno ${d.id} — ${escapeHtml(d.title)}</b><br>${escapeHtml(d.date)}`);
+});
+heroMap.on('focus', ()=>heroMap.scrollWheelZoom.enable());
+heroMap.on('blur', ()=>heroMap.scrollWheelZoom.disable());
+
+/* ============================================================
+   STATISTICHE + STRIP
+   ============================================================ */
+const totalKm = days.reduce((a,d)=>a+d.km,0);
+const totalBooked = days.reduce((a,d)=>a+d.booked.length,0);
+const totalOptional = days.reduce((a,d)=>a+d.optional.length + d.stops.filter(s=>s.status==='optional').length,0);
+const regions = new Set(days.map(d=>d.region)).size;
+
+document.getElementById('stat-km').textContent = totalKm;
+document.getElementById('stat-strip').innerHTML = `
+  <div class="strip-cell"><div class="v">7</div><div class="k">Giorni in viaggio</div></div>
+  <div class="strip-cell"><div class="v">${totalKm}</div><div class="k">Km stimati totali</div></div>
+  <div class="strip-cell"><div class="v">${totalBooked}</div><div class="k">Attività prenotate</div></div>
+  <div class="strip-cell"><div class="v">${totalOptional}</div><div class="k">Soste opzionali</div></div>
+  <div class="strip-cell"><div class="v" id="countdown-v">—</div><div class="k" id="countdown-k">Al check-in</div></div>
+`;
+
+function updateCountdown(){
+  const now = new Date();
+  const diff = TRIP_START - now;
+  const el = document.getElementById('countdown-v');
+  const kl = document.getElementById('countdown-k');
+  if(!el) return;
+  if(diff > 0){
+    const days_ = Math.floor(diff/86400000);
+    el.textContent = days_;
+    kl.textContent = 'Giorni al check-in';
+  } else if (now < RETURN_FLIGHT){
+    el.textContent = 'In corso';
+    kl.textContent = 'Buon viaggio!';
+  } else {
+    el.textContent = '✓';
+    kl.textContent = 'Viaggio concluso';
+  }
+}
+updateCountdown();
+setInterval(updateCountdown, 60000);
+
+/* ============================================================
+   EXTRA OPZIONALI PER ZONA
+   ============================================================ */
+const extraCols = document.getElementById('extra-cols');
+Object.entries(extras).forEach(([zone,list])=>{
+  const div=document.createElement('div');
+  div.className='extra-card';
+  div.innerHTML = `<h4>${escapeHtml(zone)}</h4><ul>${list.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`;
+  extraCols.appendChild(div);
+});
+
+/* ============================================================
+   FOOTER: CHECKLIST / DOCUMENTI / BUDGET
+   ============================================================ */
+const checklistItems = ['Prenotazione hotel','Voucher auto a noleggio','Biglietti Loro Parque','Biglietti Siam Park','Biglietti escursione Delfini','Biglietti Quad Teide','Costume + crema solare','Felpa per il Teide'];
+document.getElementById('checklist').innerHTML = checklistItems.map((t,i)=>
+  `<label class="check-item"><input type="checkbox" id="chk-${i}"> ${escapeHtml(t)}</label>`).join('');
+
+const docItems = ['Carta d’identità / Passaporto','Patente di guida','Carta d’imbarco','Assicurazione di viaggio','Conferma noleggio auto','Prenotazione hotel (PDF)'];
+document.getElementById('documents').innerHTML = docItems.map((t,i)=>
+  `<label class="check-item"><input type="checkbox" id="doc-${i}"> ${escapeHtml(t)}</label>`).join('');
+
+const budgetItems = [
+  {label:'Hotel (7 notti)', v:560},
+  {label:'Auto a noleggio', v:180},
+  {label:'Carburante', v:70},
+  {label:'Loro Parque + Siam Park', v:130},
+  {label:'Escursione Delfini', v:90},
+  {label:'Quad Teide', v:110},
+  {label:'Cibo / ristoranti', v:280},
+  {label:'Varie / souvenir', v:100}
+];
+const budgetEl = document.getElementById('budget');
+budgetEl.innerHTML = budgetItems.map((b,i)=>
+  `<div class="budget-row"><span>${escapeHtml(b.label)}</span><input type="number" class="budget-input" data-i="${i}" value="${b.v}" min="0"></div>`).join('');
+
+function updateBudget(){
+  let total=0;
+  document.querySelectorAll('.budget-input').forEach(inp=>total+=Number(inp.value||0));
+  document.getElementById('budget-total').textContent = '€ '+total.toLocaleString('it-IT');
+}
+budgetEl.addEventListener('input', updateBudget);
+updateBudget();
+
+/* ============================================================
+   SCROLL: reveal cards + nav pill attivo
+   ============================================================ */
+const passObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('inview'); });
+},{threshold:.15});
+document.querySelectorAll('.pass').forEach(p=>passObserver.observe(p));
+
+const navObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id = e.target.id.replace('day-','');
+      document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active', p.dataset.day===id));
+    }
+  });
+},{threshold:.5, rootMargin:'-80px 0px -50% 0px'});
+document.querySelectorAll('.day-section').forEach(s=>navObserver.observe(s));
+</script>
+</body>
+</html>

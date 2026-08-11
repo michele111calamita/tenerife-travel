@@ -347,21 +347,22 @@ const days = [
   {
     id:2, code:'TFS-02', date:'Dom 16 Agosto', title:'Sopra le nuvole', region:'Teide', important:false,
     km:145, drive:'2h 30m',
-    booked:['Escursione in quad sul Teide'],
+    booked:['Escursione in quad sul Teide','Pranzo — Limonella, Las Americas 13:30'],
     optional:[],
-    tips:['Porta una felpa: sopra i 2.000 m le temperature scendono anche in agosto.','Scarpe chiuse obbligatorie per il quad.','Porta abbastanza acqua: l’aria secca in quota disidrata più del previsto.'],
+    tips:['Porta una felpa: sopra i 2.000 m le temperature scendono anche in agosto.','Scarpe chiuse obbligatorie per il quad.','Porta abbastanza acqua: l’aria secca in quota disidrata più del previsto.','Scendi dal Teide in tempo per il pranzo delle 13:30 a Las Americas: parti dal parco entro le 12.'],
     stops:[
       {name:'Hotel — partenza', lat:28.0567, lng:-16.7292, status:'neutral', time:'Mattina presto', note:''},
       {name:'Mirador del Teide', lat:28.2361, lng:-16.6414, status:'neutral', time:'', note:'Primo sguardo sul vulcano'},
       {name:'Parco Nazionale del Teide', lat:28.2723, lng:-16.6418, status:'neutral', time:'', note:'Paesaggio lunare, colate laviche'},
       {name:'View Point', lat:28.2716, lng:-16.6425, status:'neutral', time:'', note:'Sosta panoramica'},
+      {name:'Limonella', lat:28.0567, lng:-16.7292, status:'booked', time:'13:30', note:'Pranzo prenotato, Las Americas'},
       {name:'Escursione Quad', lat:28.1850, lng:-16.7500, status:'booked', time:'Pomeriggio', note:'Attività prenotata'}
     ]
   },
   {
     id:3, code:'TFS-03', date:'Lun 17 Agosto', title:'Al largo', region:'Costa Sud',
     km:38, drive:'1h 10m',
-    booked:['Escursione Delfini — Las Galletas'],
+    booked:['Escursione Delfini — Las Galletas','Cena — Besame Mucho, Monkey Beach 20:30'],
     optional:['Cueva La Vaca','Jet ski — Puerto Colón'],
     tips:['Imbarco puntuale a Las Galletas: arriva con 20 minuti di anticipo.','Porta un cambio: si torna bagnati.','Jet ski meglio presto pomeriggio, prima che gli alisei alzino il mare a sud da metà pomeriggio.'],
     stops:[
@@ -370,7 +371,8 @@ const days = [
       {name:'Escursione Delfini', lat:28.0050, lng:-16.6650, status:'booked', time:'', note:'Attività prenotata'},
       {name:'Bufadero Costa Adeje', lat:28.0967, lng:-16.7796, status:'neutral', time:'', note:'Soffioni di roccia vulcanica'},
       {name:'Jet ski — Puerto Colón', lat:28.0865, lng:-16.7277, status:'optional', time:'Pomeriggio', note:'Noleggio jet ski, opzionale dopo i delfini'},
-      {name:'Cueva La Vaca', lat:28.2427, lng:-16.8384, status:'optional', time:'', note:'Grotta costiera (opzionale, se avanza tempo)'}
+      {name:'Cueva La Vaca', lat:28.2427, lng:-16.8384, status:'optional', time:'', note:'Grotta costiera (opzionale, se avanza tempo)'},
+      {name:'Besame Mucho — Monkey Beach', lat:28.0870, lng:-16.7450, status:'booked', time:'20:30', note:'Cena prenotata, Monkey Beach Costa Adeje'}
     ]
   },
   {

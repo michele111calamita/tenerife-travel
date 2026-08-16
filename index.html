@@ -345,18 +345,22 @@ const days = [
     ]
   },
   {
-    id:2, code:'TFS-02', date:'Dom 16 Agosto', title:'Sopra le nuvole', region:'Teide', important:false,
-    km:145, drive:'2h 30m',
-    booked:['Escursione in quad sul Teide','Pranzo — Limonella, Las Americas 13:30'],
-    optional:[],
-    tips:['Porta una felpa: sopra i 2.000 m le temperature scendono anche in agosto.','Scarpe chiuse obbligatorie per il quad.','Porta abbastanza acqua: l’aria secca in quota disidrata più del previsto.','Scendi dal Teide in tempo per il pranzo delle 13:30 a Las Americas: parti dal parco entro le 12.'],
+    id:2, code:'TFS-02', date:'Dom 16 Agosto', title:'Verso il verde', region:'Nord',
+    km:205, drive:'2h 55m',
+    booked:['Loro Parque'],
+    optional:['Mirador Playa Los Roques','Elevador de Agua de Gordejuela','Playa Castro','Social La Quinta Garden'],
+    tips:['Giornata lunga: parti presto per sfruttare bene Loro Parque prima della folla di mezzogiorno.','Puerto de la Cruz è ottimo per pranzo — piscine naturali di Lago Martianez per il pomeriggio.','Rientro verso sud via La Laguna/Santa Cruz (strada principale nord-sud): sfruttalo per Santa Cruz e Las Teresitas nel tardo pomeriggio prima di tornare in hotel.'],
     stops:[
-      {name:'Hotel — partenza', lat:28.0567, lng:-16.7292, status:'neutral', time:'Mattina presto', note:''},
-      {name:'Mirador del Teide', lat:28.2361, lng:-16.6414, status:'neutral', time:'', note:'Primo sguardo sul vulcano'},
-      {name:'Parco Nazionale del Teide', lat:28.2723, lng:-16.6418, status:'neutral', time:'', note:'Paesaggio lunare, colate laviche'},
-      {name:'View Point', lat:28.2716, lng:-16.6425, status:'neutral', time:'', note:'Sosta panoramica'},
-      {name:'Limonella', lat:28.0567, lng:-16.7292, status:'booked', time:'13:30', note:'Pranzo prenotato, Las Americas'},
-      {name:'Escursione Quad', lat:28.1850, lng:-16.7500, status:'booked', time:'Pomeriggio', note:'Attività prenotata'}
+      {name:'Hotel — partenza', lat:28.0567, lng:-16.7292, status:'neutral', time:'Presto', note:''},
+      {name:'Loro Parque', lat:28.4085, lng:-16.5713, status:'booked', time:'Mattina', note:'Attività prenotata'},
+      {name:'Puerto de la Cruz', lat:28.4130, lng:-16.5451, status:'neutral', time:'Pranzo', note:'Centro storico e porto'},
+      {name:'Lago Martianez', lat:28.4144, lng:-16.5479, status:'neutral', time:'Pomeriggio', note:'Piscine naturali disegnate da César Manrique'},
+      {name:'Mirador Playa Los Roques', lat:28.3868, lng:-16.5252, status:'optional', time:'', note:'Opzionale'},
+      {name:'Elevador de Agua de Gordejuela', lat:28.4180, lng:-16.5390, status:'optional', time:'', note:'Opzionale'},
+      {name:'Playa Castro', lat:28.4215, lng:-16.5320, status:'optional', time:'', note:'Opzionale'},
+      {name:'Social La Quinta Garden', lat:28.4100, lng:-16.5480, status:'optional', time:'', note:'Opzionale'},
+      {name:'Santa Cruz de Tenerife', lat:28.4682, lng:-16.2546, status:'neutral', time:'Tardo pomeriggio', note:'Plaza de España e Rambla, sulla via del rientro'},
+      {name:'Playa Las Teresitas', lat:28.5107, lng:-16.1974, status:'neutral', time:'Tardo pomeriggio', note:'Sosta sulla via del rientro, sabbia dorata dal Sahara'}
     ]
   },
   {
@@ -376,22 +380,18 @@ const days = [
     ]
   },
   {
-    id:4, code:'TFS-04', date:'Mar 18 Agosto', title:'Verso il verde', region:'Nord',
-    km:205, drive:'2h 55m',
-    booked:['Loro Parque'],
-    optional:['Mirador Playa Los Roques','Elevador de Agua de Gordejuela','Playa Castro','Social La Quinta Garden'],
-    tips:['Giornata lunga: parti presto per sfruttare bene Loro Parque prima della folla di mezzogiorno.','Puerto de la Cruz è ottimo per pranzo — piscine naturali di Lago Martianez per il pomeriggio.','Rientro verso sud via La Laguna/Santa Cruz (strada principale nord-sud): sfruttalo per Santa Cruz e Las Teresitas nel tardo pomeriggio prima di tornare in hotel.'],
+    id:4, code:'TFS-04', date:'Mar 18 Agosto', title:'La strada più bella', region:'Road trip', important:true,
+    km:140, drive:'3h 20m',
+    booked:[],
+    optional:['Mirador 500 Scalones'],
+    tips:['Strade strette e tornanti fino a Masca: parti presto, prima dei bus turistici.','Pieno di carburante prima di partire: pochi distributori lungo il percorso.','Giornata alleggerita rispetto alla versione originale: niente Punta de Teno (accesso spesso chiuso ad agosto) né doppioni di piscine naturali.'],
     stops:[
-      {name:'Hotel — partenza', lat:28.0567, lng:-16.7292, status:'neutral', time:'Presto', note:''},
-      {name:'Loro Parque', lat:28.4085, lng:-16.5713, status:'booked', time:'Mattina', note:'Attività prenotata'},
-      {name:'Puerto de la Cruz', lat:28.4130, lng:-16.5451, status:'neutral', time:'Pranzo', note:'Centro storico e porto'},
-      {name:'Lago Martianez', lat:28.4144, lng:-16.5479, status:'neutral', time:'Pomeriggio', note:'Piscine naturali disegnate da César Manrique'},
-      {name:'Mirador Playa Los Roques', lat:28.3868, lng:-16.5252, status:'optional', time:'', note:'Opzionale'},
-      {name:'Elevador de Agua de Gordejuela', lat:28.4180, lng:-16.5390, status:'optional', time:'', note:'Opzionale'},
-      {name:'Playa Castro', lat:28.4215, lng:-16.5320, status:'optional', time:'', note:'Opzionale'},
-      {name:'Social La Quinta Garden', lat:28.4100, lng:-16.5480, status:'optional', time:'', note:'Opzionale'},
-      {name:'Santa Cruz de Tenerife', lat:28.4682, lng:-16.2546, status:'neutral', time:'Tardo pomeriggio', note:'Plaza de España e Rambla, sulla via del rientro'},
-      {name:'Playa Las Teresitas', lat:28.5107, lng:-16.1974, status:'neutral', time:'Tardo pomeriggio', note:'Sosta sulla via del rientro, sabbia dorata dal Sahara'}
+      {name:'Los Gigantes', lat:28.2424, lng:-16.8399, status:'neutral', time:'Mattina presto', note:'Falesie a picco sul mare'},
+      {name:'Masca', lat:28.2839, lng:-16.8244, status:'neutral', time:'', note:'Borgo tra le gole vulcaniche'},
+      {name:'Garachico', lat:28.3706, lng:-16.7642, status:'neutral', time:'Pranzo', note:'Piscine naturali laviche'},
+      {name:'Drago Millenario, Icod', lat:28.3714, lng:-16.7202, status:'neutral', time:'', note:'Il drago millenario simbolo dell’isola'},
+      {name:'Charco del Viento', lat:28.3730, lng:-16.7660, status:'neutral', time:'', note:'Piscina naturale con chiringuito, vibe locale surfisti'},
+      {name:'Mirador 500 Scalones', lat:28.3600, lng:-16.7000, status:'optional', time:'', note:'Opzionale, se resta luce'}
     ]
   },
   {
@@ -408,18 +408,16 @@ const days = [
     ]
   },
   {
-    id:6, code:'TFS-06', date:'Gio 20 Agosto', title:'La strada più bella', region:'Road trip', important:true,
-    km:140, drive:'3h 20m',
-    booked:[],
-    optional:['Mirador 500 Scalones'],
-    tips:['Strade strette e tornanti fino a Masca: parti presto, prima dei bus turistici.','Pieno di carburante prima di partire: pochi distributori lungo il percorso.','Giornata alleggerita rispetto alla versione originale: niente Punta de Teno (accesso spesso chiuso ad agosto) né doppioni di piscine naturali.'],
+    id:6, code:'TFS-06', date:'Gio 20 Agosto', title:'Sopra le nuvole', region:'Teide', important:false,
+    km:145, drive:'2h 30m',
+    booked:['Escursione in quad sul Teide 9:40','Pranzo — Limonella, Las Americas 13:30'],
+    optional:[],
+    tips:['Porta una felpa: sopra i 2.000 m le temperature scendono anche in agosto.','Scarpe chiuse obbligatorie per il quad.','Porta abbastanza acqua: l’aria secca in quota disidrata più del previsto.','Quad alle 9:40 copre già la salita al Teide: pomeriggio libero, niente altra guida — relax vicino hotel dopo mattinata intensa.'],
     stops:[
-      {name:'Los Gigantes', lat:28.2424, lng:-16.8399, status:'neutral', time:'Mattina presto', note:'Falesie a picco sul mare'},
-      {name:'Masca', lat:28.2839, lng:-16.8244, status:'neutral', time:'', note:'Borgo tra le gole vulcaniche'},
-      {name:'Garachico', lat:28.3706, lng:-16.7642, status:'neutral', time:'Pranzo', note:'Piscine naturali laviche'},
-      {name:'Drago Millenario, Icod', lat:28.3714, lng:-16.7202, status:'neutral', time:'', note:'Il drago millenario simbolo dell’isola'},
-      {name:'Charco del Viento', lat:28.3730, lng:-16.7660, status:'neutral', time:'', note:'Piscina naturale con chiringuito, vibe locale surfisti'},
-      {name:'Mirador 500 Scalones', lat:28.3600, lng:-16.7000, status:'optional', time:'', note:'Opzionale, se resta luce'}
+      {name:'Hotel — partenza', lat:28.0567, lng:-16.7292, status:'neutral', time:'Mattina presto', note:''},
+      {name:'Escursione Quad', lat:28.1850, lng:-16.7500, status:'booked', time:'9:40', note:'Attività prenotata — copre la salita al Teide'},
+      {name:'Limonella', lat:28.0567, lng:-16.7292, status:'booked', time:'13:30', note:'Pranzo prenotato, Las Americas'},
+      {name:'Costa Adeje', lat:28.0916, lng:-16.7460, status:'neutral', time:'Pomeriggio', note:'Pomeriggio libero, piscina o lungomare'}
     ]
   },
   {
@@ -427,7 +425,7 @@ const days = [
     km:25, drive:'30 min',
     booked:['Volo di rientro 15:30'],
     optional:[],
-    tips:['Giornata leggera: hotel e aeroporto sono entrambi a sud, pochi minuti di strada.','Las Teresitas è già stata spostata al Giorno 4, sulla via del rientro da nord — qui resta solo l’ultima mattinata libera.','Check-out entro l’orario hotel, bagagli in auto prima di uscire per l’ultima mattinata.'],
+    tips:['Giornata leggera: hotel e aeroporto sono entrambi a sud, pochi minuti di strada.','Las Teresitas è già stata spostata al Giorno 2, sulla via del rientro da nord — qui resta solo l’ultima mattinata libera.','Check-out entro l’orario hotel, bagagli in auto prima di uscire per l’ultima mattinata.'],
     stops:[
       {name:'Check-out hotel', lat:28.0567, lng:-16.7292, status:'neutral', time:'Mattina', note:''},
       {name:'Playa de Las Americas / Costa Adeje', lat:28.0916, lng:-16.7460, status:'neutral', time:'Mattina', note:'Ultima mattinata libera, spiaggia o lungomare'},
